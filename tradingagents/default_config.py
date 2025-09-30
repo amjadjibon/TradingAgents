@@ -19,4 +19,8 @@ DEFAULT_CONFIG = {
     "max_recur_limit": 100,
     # Tool settings
     "online_tools": True,
+    # Phoenix Tracing settings
+    "phoenix_tracing": os.getenv("PHOENIX_TRACING", "false").lower() == "true",
+    "phoenix_collector_endpoint": os.getenv("PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:4317"),
+    "phoenix_project": os.getenv("PHOENIX_PROJECT", "tradingagents"),
 }

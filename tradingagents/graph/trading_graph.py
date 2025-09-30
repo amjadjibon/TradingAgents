@@ -27,6 +27,7 @@ from .setup import GraphSetup
 from .propagation import Propagator
 from .reflection import Reflector
 from .signal_processing import SignalProcessor
+from .tracing import PhoenixTracer
 
 
 class TradingAgentsGraph:
@@ -36,7 +37,7 @@ class TradingAgentsGraph:
         self,
         selected_analysts=["market", "social", "news", "fundamentals"],
         debug=False,
-        config: Dict[str, Any] = None,
+        config: Dict[str, Any] | None = None,
     ):
         """Initialize the trading agents graph and components.
 
@@ -47,6 +48,10 @@ class TradingAgentsGraph:
         """
         self.debug = debug
         self.config = config or DEFAULT_CONFIG
+
+        # Setup Phoenix tracing if enabled
+        self.phoenix_tracer = PhoenixTracer(self.config)
+        self.phoenix_tracer.setup()
 
         # Update the interface's config
         set_config(self.config)
@@ -187,6 +192,14 @@ class TradingAgentsGraph:
         )
         args = self.propagator.get_graph_args()
 
+        # Add Phoenix tracing metadata if enabled
+        if self.phoenix_tracer.is_active:
+            if "metadata" not in args:
+                args["metadata"] = {}
+            args["metadata"]["ticker"] = company_name
+            args["metadata"]["trade_date"] = trade_date
+            args["metadata"] = self.phoenix_tracer.add_metadata(args["metadata"])
+
         if self.debug:
             # Debug mode with tracing
             trace = []
@@ -274,3 +287,15 @@ class TradingAgentsGraph:
     def process_signal(self, full_signal):
         """Process a signal to extract the core decision."""
         return self.signal_processor.process_signal(full_signal)
+
+    def cleanup(self):
+        """Clean up resources including Phoenix tracing."""
+        if self.phoenix_tracer:
+            self.phoenix_tracer.cleanup()
+
+    def __del__(self):
+        """Destructor to ensure cleanup."""
+        try:
+            self.cleanup()
+        except Exception:
+            pass

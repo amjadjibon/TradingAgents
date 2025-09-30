@@ -1,0 +1,24 @@
+services:
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    container_name: tradingagents-phoenix
+    ports:
+      - "6006:6006"
+      - "4317:4317"  # OTLP gRPC endpoint
+      - "4318:4318"  # OTLP HTTP endpoint
+    environment:
+      - PHOENIX_PORT=6006
+      - PHOENIX_HOST=0.0.0.0
+    volumes:
+      - phoenix-data:/phoenix
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6006/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  phoenix-data:
+    driver: local
