@@ -24,3 +24,8 @@ rich
 questionary
 langchain_anthropic
 langchain-google-genai
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-otlp
+openinference-instrumentation-langchain
+jupiterlab
